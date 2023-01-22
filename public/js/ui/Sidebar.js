@@ -1,4 +1,6 @@
+
 const body = document.getElementsByTagName("body");
+
 /**
  * Класс Sidebar отвечает за работу боковой колонки:
  * кнопки скрытия/показа колонки в мобильной версии сайта

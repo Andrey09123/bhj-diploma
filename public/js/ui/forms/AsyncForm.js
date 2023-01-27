@@ -14,20 +14,22 @@ class AsyncForm {
    * */
   constructor(element) {
     if (!element) {
-      throw new Error('Ошибка!')
+      throw new Error('Элемент не должен быть пустым!');
     }
     this.element = element;
     this.registerEvents();
   }
+
   /**
    * Необходимо запретить отправку формы и в момент отправки
    * вызывает метод submit()
    * */
   registerEvents() {
-    this.element.addEventListener("submit", (e) => {
-      e.preventDefault();
+    this.element.onsubmit = () => {
+      console.log(1);
       this.submit();
-    })
+      return false;
+    };
   }
 
   /**
@@ -39,25 +41,24 @@ class AsyncForm {
    * */
   getData() {
     let obj = {};
-    let form = this.element;
-
-    for (let atr of form) {
-      obj[atr.name] = atr.value;
+    let formData = new FormData(this.element);
+    let entries = formData.entries();
+    for (let item of entries) {
+      obj[item[0]] = item[1];
     }
     return obj;
   }
 
-  onSubmit(options) {
+  onSubmit(options){
 
   }
+
   /**
    * Вызывает метод onSubmit и передаёт туда
    * данные, полученные из метода getData()
    * */
   submit() {
-
     let result = this.getData();
     this.onSubmit(result);
-    console.log(result)
   }
 }

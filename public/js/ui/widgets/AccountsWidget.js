@@ -15,11 +15,11 @@ class AccountsWidget {
    * */
   constructor(element) {
     if (!element) {
-      throw new Error('Элемент не существует');
+      throw new Error('Элемент не должен быть пустым!');
     }
     this.element = element;
-    this.registerEvents();
     this.update();
+
   }
 
   /**
@@ -30,18 +30,17 @@ class AccountsWidget {
    * вызывает AccountsWidget.onSelectAccount()
    * */
   registerEvents() {
-
-    this.element.addEventListener('click', e => {
-      e.preventDefault();
-      if (e.target.closest('.pull-right')) {
-        const modal = App.getModal('createAccount');
-        modal.open();
-      }
-      else if (e.target.closest('.account')) {
-        this.onSelectAccount(e.target.closest('.account'));
-      }
-    })
+    document.querySelector('.create-account').onclick = function() {
+      App.getModal('createAccount').open();
+    };
+    let arr = document.querySelectorAll('.account');
+    for (let item of arr) {
+      item.onclick = () => {
+        this.onSelectAccount(item);
+      };
+    }
   }
+
   /**
    * Метод доступен только авторизованным пользователям
    * (User.current()).
@@ -53,22 +52,22 @@ class AccountsWidget {
    * метода renderItem()
    * */
   update() {
-
-    if (!User.current()) {
-      return;
+    let user = User.current();
+    if (user && user.id) {
+      let data = {
+        mail: user.email
+      };
+      let callback = (error, response) => {
+        if (!error) {
+          this.clear();
+        }
+        for (let item of response.data) {
+          this.renderItem(item);
+        }
+        this.registerEvents();
+      }
+      createRequest({url: '/account', data, callback, method: 'GET'});
     }
-    Account.list(User.current(), (err, response) => {
-      if (err) {
-        return;
-      }
-      if (!response.data) {
-        return;
-      }
-      this.clear();
-      response.data.forEach(item => {
-        this.renderItem(item);
-      });
-    });
   }
 
   /**
@@ -77,8 +76,10 @@ class AccountsWidget {
    * в боковой колонке
    * */
   clear() {
-
-    [...this.element.querySelectorAll('.account')].forEach(item => item.remove());
+    let arr = document.querySelectorAll('.account');
+    for (let item of arr) {
+      item.remove();
+    }
   }
 
   /**
@@ -89,26 +90,30 @@ class AccountsWidget {
    * Вызывает App.showPage( 'transactions', { account_id: id_счёта });
    * */
   onSelectAccount(element) {
-    if (this.element.querySelector('.active')) {
-      this.element.querySelector('.active').classList.remove('active');
+    let currentAccount = this.element.querySelector('.account.active');
+    let arr = document.querySelectorAll('.account');
+    for (let item of arr) {
+      item.classList.remove('active');
     }
-    element.closest('.account').classList.add('active');
-   App.showPage('transactions', { account_id: element.closest('.account').dataset.id});
-   
+
+    element.classList.add('active');
+    App.showPage('transactions', {account_id: element.dataset['id']});
   }
+
   /**
    * Возвращает HTML-код счёта для последующего
    * отображения в боковой колонке.
    * item - объект с данными о счёте
    * */
-  getAccountHTML(item) {
-    return `
-          <li class="account" data-id="${item.id}">
-              <a href="#">
-                  ${item.name} / ${item.sum} ₽
-              </a>
-          </li>
-        `;
+  getAccountHTML(item){
+   let code =
+    `<li class="account" data-id="${item.id}">
+    <a href="#">
+        <span>${item.name}</span> /
+        <span>${item.sum} ₽</span>
+    </a>
+    </li>`;
+    return code;
   }
 
   /**
@@ -117,7 +122,9 @@ class AccountsWidget {
    * AccountsWidget.getAccountHTML HTML-код элемента
    * и добавляет его внутрь элемента виджета
    * */
-  renderItem(item) {
-    this.element.insertAdjacentHTML('beforeend', this.getAccountHTML(item));
+  renderItem(data){ 
+    let element = document.createElement('div');
+    element.innerHTML = this.getAccountHTML(data);
+    this.element.appendChild(element.firstChild);    
   }
 }

@@ -208,4 +208,3 @@ class App {
     this.getForm("createExpense").renderAccountsList();
   }
 }
-

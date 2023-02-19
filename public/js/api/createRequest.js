@@ -1,45 +1,36 @@
-/**
- * Основная функция для совершения запросов
- * на сервер.
- * */
 const createRequest = (options = {}) => {
-	try {
-		let formData = new FormData();
-		const xhr = new XMLHttpRequest;
-	
-		if (options.method === "GET") {
-		  options.url += `?`;
-		  for (let option in options.data) {
-	
-			options.url += `${option}=${options.data[option]}&`;
-			console.log('Отправили гет, options.data =' + options.data, options)
-		  }
-		}
-		else {
-		  for (let option in options.data) {
-			formData.append(option, options.data[option]);
-			console.log('Отправили пост, options.data =' + options.data, options)
-		  }
-		}
-		if (options.headers) {
-		  for (let header in options.headers) {
-			xhr.setRequestHeader(header, options.headers[header]);
-		  }
-		}
-	
-		xhr.open(options.method, options.url);
-		xhr.withCredentials = true;
-		xhr.responseType = "json";
-		xhr.send(formData);
-	
-		xhr.addEventListener("readystatechange", () => {
-		  if (xhr.readyState === xhr.DONE && xhr.status === 200) {
-			options.callback(null, xhr.response);
-		  }
-		})
-	  }
-	  catch (e) {
-		options.callback(e, null);
-		console.log('Произошла ошибка ' + e)
-	  }
+    let formData = new FormData();
+    if (options.method.toUpperCase() != 'GET') {
+        for (let field in options.data) {
+            formData.append(field, options.data[field]);
+        }
+    } else {
+        let param = '';
+        let arr = [];
+        for (let field in options.data) {
+          arr.push(field + '=' + options.data[field]);
+        }
+        param = arr.join('&');
+        options.url = options.url + '?' + param;
+    }    
+    let xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+    try {
+        xhr.open(options.method, options.url);
+        xhr.send(formData);
+    }
+    catch (e) {
+    options.callback(e);
+  }
+
+    xhr.onload = function() {
+        let response = null;
+        let error = null;
+        if (xhr.status != 200) {
+            error = xhr.statusText;
+        } else {
+            response = xhr.response;
+        }
+        options.callback(error, response);
+    }
 };

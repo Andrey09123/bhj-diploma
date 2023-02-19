@@ -1,6 +1,3 @@
-
-const body = document.getElementsByTagName("body");
-
 /**
  * Класс Sidebar отвечает за работу боковой колонки:
  * кнопки скрытия/показа колонки в мобильной версии сайта
@@ -21,11 +18,10 @@ class Sidebar {
    * при нажатии на кнопку .sidebar-toggle
    * */
   static initToggleButton() {
-    const sidebarToggle = document.querySelector(".sidebar-toggle");
-    sidebarToggle.addEventListener("click", () => {
-      body[0].classList.toggle("sidebar-open");
-      body[0].classList.toggle("sidebar-collapse");
-    })
+    document.querySelector('.sidebar-toggle').onclick = function() {
+      document.querySelector('body').classList.toggle('sidebar-open');
+      document.querySelector('body').classList.toggle('sidebar-collapse');
+    };
   }
 
   /**
@@ -36,25 +32,24 @@ class Sidebar {
    * выходу устанавливает App.setState( 'init' )
    * */
   static initAuthLinks() {
+    document.querySelector('.menu-item_register').onclick = function() {
+      let modal = App.getModal('register');
+      modal.open();
+    };
 
-    const registerButton = document.getElementsByClassName("menu-item_register");
-    registerButton[0].addEventListener("click", (e) => {
-      e.preventDefault();
-      App.getModal('register').open();
-    });
-    const loginButton = document.getElementsByClassName("menu-item_login");
-    loginButton[0].addEventListener("click", (e) => {
-      e.preventDefault();
-      App.getModal('login').open();
-    });
-    const logOutButton = document.getElementsByClassName("menu-item_logout");
-    logOutButton[0].addEventListener("click", () => {
+    document.querySelector('.menu-item_login').onclick = function() {
+      let modal = App.getModal('login');
+      modal.open();
+    };
 
-      User.logout(User.current(), (err, response) => {
-        if (response && response.success) {
+    document.querySelector('.menu-item_logout').onclick = function() {
+      let callback = function(error, response) {
+        console.log(response);
+        if (response.success == true) {
           App.setState('init');
         }
-      });
-    });
+      };
+      User.logout(callback);
+    };
   }
 }

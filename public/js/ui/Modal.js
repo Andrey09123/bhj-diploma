@@ -4,7 +4,6 @@
  * В первую очередь это открытие или
  * закрытие имеющихся окон
  * */
-const modalWindow = Array.from(document.getElementsByClassName("modal fade in"));
 class Modal {
   /**
    * Устанавливает текущий элемент в свойство element
@@ -12,14 +11,12 @@ class Modal {
    * Если переданный элемент не существует,
    * необходимо выкинуть ошибку.
    * */
-  constructor(element) {
-    try {
-      this.element = element;
-      this.registerEvents();
+  constructor(element){
+    if (!element) {
+      throw new Error('Элемент не должен быть пустым!');
     }
-    catch (err) {
-      console.log(err);
-    }
+    this.element = element;
+    this.registerEvents();
   }
 
   /**
@@ -28,19 +25,19 @@ class Modal {
    * (с помощью метода Modal.onClose)
    * */
   registerEvents() {
-    this.element.querySelectorAll('[data-dismiss]').forEach(item => {
-      item.addEventListener('click', (e) => {
+    let list = this.element.querySelectorAll("[data-dismiss='modal']");
+    for (let item of list) {
+      item.onclick = () => {
         this.onClose();
-        e.preventDefault();
-      })
-    })
+      }
+    }
   }
+
   /**
    * Срабатывает после нажатия на элементы, закрывающие окно.
    * Закрывает текущее окно (Modal.close())
    * */
   onClose(e) {
-
     this.close();
   }
   /**
@@ -53,7 +50,7 @@ class Modal {
   /**
    * Закрывает окно: удаляет CSS-свойство display
    * */
-  close() {
+  close(){
     this.element.style.display = 'none';
   }
 }
